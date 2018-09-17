@@ -2,6 +2,8 @@ import * as express from 'express'
 import * as bodyParser from 'body-parser'
 import { DataStoreService } from './DataStoreService';
 import { TelemetryPayload } from '../models/TelemetryPayload';
+import { FlattenedBarrel } from '../models/FlattenedBarrel';
+import { Satellite } from '../models/Satellite';
 
 export class RestApiService {
     
@@ -39,8 +41,29 @@ export class RestApiService {
         this.expressApp.post('/getSatellites', (req, res) => {
             res.send(this.dataStoreService.GetSatellites())
         });
+
+        // This Really should be taking place on the client, but did here for sake of time
+        this.expressApp.post('/getFlattenedBarrels', (req, res) => {
+            res.send(this.flattenToBarrels(this.dataStoreService.GetSatellites()));
+        });
         
         this.expressApp.listen(3001, () => console.log('REST API Listening on port 3001'));
 
+    }
+
+
+    private flattenToBarrels(satellites: Array<Satellite>): Array<FlattenedBarrel> {
+        const flattenedBarrels = satellites.flatMap((s, i, a) => {
+            return s.barrels.map(b => <FlattenedBarrel>{
+                barrel_id: b.barrel_id,
+                errors: b.errors.join(', '),
+                last_flavor_sensor_result: b.last_flavor_sensor_result,
+                satellite_id: s.satellite_id,
+                status: b.status,
+                update_age: Date.now()
+            })
+        });
+
+        return flattenedBarrels;
     }
 }

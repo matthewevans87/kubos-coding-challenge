@@ -4,7 +4,7 @@ const DataStoreService_1 = require("./services/DataStoreService");
 const RestApiService_1 = require("./services/RestApiService");
 class WebAPI {
     static async main() {
-        const dataStoreService = new DataStoreService_1.DataStoreService();
+        const dataStoreService = new DataStoreService_1.MemoryBackedDataStoreService();
         const restApiService = new RestApiService_1.RestApiService(dataStoreService);
         restApiService.InitWebServer();
         return;
